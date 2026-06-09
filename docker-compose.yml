@@ -1,0 +1,51 @@
+version: "3.9"
+
+services:
+
+  # ───────────────────────────────────────────
+  # Container 1: MySQL Database
+  # ───────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: library_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: library_db
+      MYSQL_USER: libraryuser
+      MYSQL_PASSWORD: librarypass
+    ports:
+      - "3306:3306"          # Expose MySQL to host (optional, for tools like MySQL Workbench)
+    volumes:
+      - mysql_data:/var/lib/mysql   # Persist data even after container stops
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ───────────────────────────────────────────
+  # Container 2: Flask App (Frontend + Backend)
+  # ───────────────────────────────────────────
+  app:
+    image: ${DOCKER_REGISTRY_USER}/library_app:latest
+    container_name: library_app
+    restart: always
+    ports:
+      - "5000:5000"                 # Access site at http://localhost:5000
+    environment:
+      DB_HOST: db                   # 'db' is the service name above — Docker resolves it
+      DB_PORT: 3306
+      DB_NAME: library_db
+      DB_USER: libraryuser
+      DB_PASSWORD: librarypass
+    depends_on:
+      db:
+        condition: service_healthy  # Wait for MySQL to be ready before starting Flask
+
+# ───────────────────────────────────────────
+# Named volume — survives container restarts
+# ───────────────────────────────────────────
+volumes:
+  mysql_data:

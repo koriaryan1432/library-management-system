@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bibliotheca — Library Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="brand">
+    <span class="brand-icon">📚</span>
+    <div>
+      <h1 class="brand-name">Bibliotheca</h1>
+      <p class="brand-sub">Library Management</p>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-item active" data-page="dashboard">
+      <span class="nav-icon">◈</span> Dashboard
+    </button>
+    <button class="nav-item" data-page="books">
+      <span class="nav-icon">◉</span> Books
+    </button>
+    <button class="nav-item" data-page="members">
+      <span class="nav-icon">◎</span> Members
+    </button>
+    <button class="nav-item" data-page="loans">
+      <span class="nav-icon">◑</span> Loan History
+    </button>
+    <button class="nav-item" data-page="issue">
+      <span class="nav-icon">◐</span> Issue Book
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <p>Chandigarh Library &copy; 2025</p>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <section class="page active" id="page-dashboard">
+    <header class="page-header">
+      <div>
+        <h2 class="page-title">Good day, Librarian</h2>
+        <p class="page-subtitle">Here's what's happening in your library today.</p>
+      </div>
+    </header>
+
+    <div class="stats-grid">
+      <div class="stat-card" style="--accent:#c8a96e">
+        <div class="stat-label">Total Books</div>
+        <div class="stat-value" id="stat-books">—</div>
+        <div class="stat-icon">📖</div>
+      </div>
+      <div class="stat-card" style="--accent:#7db5a0">
+        <div class="stat-label">Members</div>
+        <div class="stat-value" id="stat-members">—</div>
+        <div class="stat-icon">👥</div>
+      </div>
+      <div class="stat-card" style="--accent:#8fa8c8">
+        <div class="stat-label">Active Loans</div>
+        <div class="stat-value" id="stat-loans">—</div>
+        <div class="stat-icon">🔖</div>
+      </div>
+      <div class="stat-card" style="--accent:#c87d7d">
+        <div class="stat-label">Overdue</div>
+        <div class="stat-value" id="stat-overdue">—</div>
+        <div class="stat-icon">⚠️</div>
+      </div>
+    </div>
+
+    <div class="section-heading">Recent Loans</div>
+    <div class="table-wrap">
+      <table class="table" id="dashboard-loans-table">
+        <thead><tr>
+          <th>Book</th><th>Member</th><th>Issued</th><th>Due</th><th>Status</th>
+        </tr></thead>
+        <tbody id="dashboard-loans-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- BOOKS -->
+  <section class="page" id="page-books">
+    <header class="page-header">
+      <div>
+        <h2 class="page-title">Book Catalogue</h2>
+        <p class="page-subtitle">Manage your entire collection</p>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('modal-add-book')">+ Add Book</button>
+    </header>
+
+    <div class="toolbar">
+      <input class="search-input" id="books-search" placeholder="Search by title, author, genre…" oninput="loadBooks()" />
+    </div>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr>
+          <th>Title</th><th>Author</th><th>Genre</th><th>ISBN</th><th>Copies</th><th>Available</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="books-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- MEMBERS -->
+  <section class="page" id="page-members">
+    <header class="page-header">
+      <div>
+        <h2 class="page-title">Members</h2>
+        <p class="page-subtitle">Library membership registry</p>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('modal-add-member')">+ Add Member</button>
+    </header>
+
+    <div class="toolbar">
+      <input class="search-input" id="members-search" placeholder="Search by name or email…" oninput="loadMembers()" />
+    </div>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr>
+          <th>Name</th><th>Email</th><th>Phone</th><th>Joined</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="members-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- LOANS -->
+  <section class="page" id="page-loans">
+    <header class="page-header">
+      <div>
+        <h2 class="page-title">Loan History</h2>
+        <p class="page-subtitle">Full record of all book transactions</p>
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-status="" onclick="setLoanFilter(this,'')">All</button>
+        <button class="filter-tab" data-status="active" onclick="setLoanFilter(this,'active')">Active</button>
+        <button class="filter-tab" data-status="returned" onclick="setLoanFilter(this,'returned')">Returned</button>
+        <button class="filter-tab" data-status="overdue" onclick="setLoanFilter(this,'overdue')">Overdue</button>
+      </div>
+    </header>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr>
+          <th>Book</th><th>Author</th><th>Member</th><th>Issued</th><th>Due</th><th>Returned</th><th>Status</th><th>Action</th>
+        </tr></thead>
+        <tbody id="loans-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ISSUE BOOK -->
+  <section class="page" id="page-issue">
+    <header class="page-header">
+      <div>
+        <h2 class="page-title">Issue a Book</h2>
+        <p class="page-subtitle">Create a new loan for a member</p>
+      </div>
+    </header>
+
+    <div class="issue-form-wrap">
+      <div class="issue-form">
+        <div class="form-group">
+          <label>Select Book</label>
+          <select id="issue-book" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label>Select Member</label>
+          <select id="issue-member" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label>Loan Duration (days)</label>
+          <input id="issue-days" type="number" class="form-control" value="14" min="1" max="60" />
+        </div>
+        <button class="btn btn-primary btn-lg" onclick="issueLoan()">Issue Book →</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ══ MODALS ══ -->
+
+<!-- Add Book -->
+<div class="modal-overlay" id="modal-add-book">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add New Book</h3>
+      <button class="modal-close" onclick="closeModal('modal-add-book')">✕</button>
+    </div>
+    <div class="form-group"><label>Title *</label><input id="book-title" class="form-control" /></div>
+    <div class="form-group"><label>Author *</label><input id="book-author" class="form-control" /></div>
+    <div class="form-group"><label>ISBN</label><input id="book-isbn" class="form-control" /></div>
+    <div class="form-group"><label>Genre</label><input id="book-genre" class="form-control" /></div>
+    <div class="form-group"><label>Total Copies</label><input id="book-copies" type="number" class="form-control" value="1" min="1" /></div>
+    <button class="btn btn-primary" onclick="saveBook()">Save Book</button>
+  </div>
+</div>
+
+<!-- Add Member -->
+<div class="modal-overlay" id="modal-add-member">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add New Member</h3>
+      <button class="modal-close" onclick="closeModal('modal-add-member')">✕</button>
+    </div>
+    <div class="form-group"><label>Full Name *</label><input id="member-name" class="form-control" /></div>
+    <div class="form-group"><label>Email *</label><input id="member-email" type="email" class="form-control" /></div>
+    <div class="form-group"><label>Phone</label><input id="member-phone" class="form-control" /></div>
+    <button class="btn btn-primary" onclick="saveMember()">Save Member</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<script src="/static/js/main.js"></script>
+</body>
+</html>

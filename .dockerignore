@@ -1,0 +1,29 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Local database file (we use MySQL in Docker)
+*.db
+*.sqlite
+
+# Environment file (credentials injected via docker-compose)
+.env
+
+# IDE files
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Docs
+README.md
