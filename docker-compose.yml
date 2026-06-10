@@ -54,7 +54,7 @@ services:
     ports:
       - "80:80" # This is the public entry point for your users
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro # Mounts the config file we created above
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro # Mounts the config file we created above
     depends_on:
       - app
 
