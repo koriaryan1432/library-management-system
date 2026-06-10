@@ -30,31 +30,28 @@ services:
   # ───────────────────────────────────────────
   app:
     image: ${DOCKER_REGISTRY_USER}/library_app:latest
-    # Removed 'container_name' because Docker can't use fixed names when scaling multiple containers
     restart: always
     expose:
-      - "5000" # Exposes to Nginx internally, not to the host machine
+      - "5000"                 # Expose internally for Nginx load balancer
     environment:
-      DB_HOST: db
+      DB_HOST: db                   # 'db' is the service name above — Docker resolves it
       DB_PORT: 3306
       DB_NAME: library_db
       DB_USER: libraryuser
       DB_PASSWORD: librarypass
     depends_on:
       db:
-        condition: service_healthy
+        condition: service_healthy  # Wait for MySQL to be ready before starting Flask
 
   # ───────────────────────────────────────────
   # Container 3: Nginx Load Balancer
   # ───────────────────────────────────────────
   nginx:
     image: nginx:alpine
-    container_name: nginx_lb
-    restart: always
     ports:
       - "80:80" # This is the public entry point for your users
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro # Mounts the config file we created above
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - app
 
