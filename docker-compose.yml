@@ -15,9 +15,9 @@ services:
       MYSQL_USER: libraryuser
       MYSQL_PASSWORD: librarypass
     ports:
-      - "3306:3306"          # Expose MySQL to host (optional, for tools like MySQL Workbench)
+      - "3306:3306"
     volumes:
-      - mysql_data:/var/lib/mysql   # Persist data even after container stops
+      - mysql_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
       interval: 10s
@@ -30,22 +30,33 @@ services:
   # ───────────────────────────────────────────
   app:
     image: ${DOCKER_REGISTRY_USER}/library_app:latest
-    container_name: library_app
+    # Removed 'container_name' because Docker can't use fixed names when scaling multiple containers
     restart: always
-    ports:
-      - "5000:5000"                 # Access site at http://localhost:5000
+    expose:
+      - "5000" # Exposes to Nginx internally, not to the host machine
     environment:
-      DB_HOST: db                   # 'db' is the service name above — Docker resolves it
+      DB_HOST: db
       DB_PORT: 3306
       DB_NAME: library_db
       DB_USER: libraryuser
       DB_PASSWORD: librarypass
     depends_on:
       db:
-        condition: service_healthy  # Wait for MySQL to be ready before starting Flask
+        condition: service_healthy
 
-# ───────────────────────────────────────────
-# Named volume — survives container restarts
-# ───────────────────────────────────────────
+  # ───────────────────────────────────────────
+  # Container 3: Nginx Load Balancer
+  # ───────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_lb
+    restart: always
+    ports:
+      - "80:80" # This is the public entry point for your users
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro # Mounts the config file we created above
+    depends_on:
+      - app
+
 volumes:
   mysql_data:
